@@ -1,0 +1,12 @@
+services:
+  front:
+    build: ./front-end
+    ports:
+      - "80:80"
+    depends_on:
+      - back
+    environment:
+      VITE_API_BASE_URL: /api
+
+  back:
+    build: ./back-end
