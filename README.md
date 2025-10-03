@@ -24,7 +24,7 @@ Deployed on EC2 using Docker at: http://taskflowapp.org
 ### 1. Clone & Setup
 ```bash
 git clone https://github.com/pratham-s2/TaskFlow
-cd task_manager
+cd ./TaskFlow
 ```
 
 ### 2. MongoDB Atlas
