@@ -7,6 +7,9 @@ export default function Dashboard({ tasks, setTasks }) {
   const [newTask, setNewTask] = useState({ title: '', description: '', status: 'To Do' })
   const [loading, setLoading] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [sortBy, setSortBy] = useState('newest')
 
   // Helper function to get auth headers
   const getAuthHeaders = () => {
@@ -166,6 +169,44 @@ export default function Dashboard({ tasks, setTasks }) {
     }
   }
 
+  // Filter and sort tasks
+  const getFilteredAndSortedTasks = () => {
+    let filteredTasks = tasks
+
+    // Filter by search term
+    if (searchTerm) {
+      filteredTasks = filteredTasks.filter(task =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Filter by status
+    if (statusFilter !== 'All') {
+      filteredTasks = filteredTasks.filter(task => task.status === statusFilter)
+    }
+
+    // Sort tasks
+    filteredTasks.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt) - new Date(a.createdAt)
+        case 'oldest':
+          return new Date(a.createdAt) - new Date(b.createdAt)
+        case 'title':
+          return a.title.localeCompare(b.title)
+        case 'status':
+          return a.status.localeCompare(b.status)
+        default:
+          return new Date(b.createdAt) - new Date(a.createdAt)
+      }
+    })
+
+    return filteredTasks
+  }
+
+  const filteredTasks = getFilteredAndSortedTasks()
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 py-8">
@@ -184,10 +225,93 @@ export default function Dashboard({ tasks, setTasks }) {
             </button>
           </div>
 
+          {/* Search and Filter Controls */}
+          <div className="mb-6 bg-white rounded-lg shadow-sm border p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Search */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Search Tasks
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by title or description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filter by Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="To Do">To Do</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Done">Done</option>
+                </select>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sort by
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="title">Title A-Z</option>
+                  <option value="status">Status</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Clear Filters */}
+            {(searchTerm || statusFilter !== 'All' || sortBy !== 'newest') && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setStatusFilter('All')
+                    setSortBy('newest')
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-800 underline"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Tasks List */}
           <div className="bg-white rounded-lg shadow-sm border">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Tasks ({tasks.length})</h2>
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Tasks ({filteredTasks.length} of {tasks.length})
+              </h2>
+              {(searchTerm || statusFilter !== 'All') && (
+                <span className="text-sm text-gray-500">
+                  {filteredTasks.length === 0 ? 'No tasks match your filters' : 'Filtered results'}
+                </span>
+              )}
             </div>
             
             {loading && tasks.length === 0 ? (
@@ -211,9 +335,29 @@ export default function Dashboard({ tasks, setTasks }) {
                   Create Task
                 </button>
               </div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                <div className="mb-4">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <p className="text-lg font-medium mb-2">No tasks match your search</p>
+                <p className="mb-4">Try adjusting your search terms or filters</p>
+                <button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setStatusFilter('All')
+                    setSortBy('newest')
+                  }}
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Clear filters
+                </button>
+              </div>
             ) : (
               <div className="divide-y divide-gray-200">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <div key={task._id} className="p-6 hover:bg-gray-50 transition-colors">
                     {isEditing === task._id ? (
                       // Edit Form
