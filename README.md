@@ -1,8 +1,22 @@
 # Task Manager
 
-A full-stack task management app with user authentication, built with React, Node.js, Express, and MongoDB.
+A full-stack task management app with user authentication, built with React, Node.js, Express, and MongoDB (Atlas).
 
 Deployed on EC2 using Docker at: http://taskflowapp.org
+
+# About the development process:
+
+I started out by initializing the project and connecting the front end, back end, and MongoDB database together. 
+My technology choices came down to comfort. I am most comfortable with react/vite/tailwind for the front end and express.js on the back end. I used MongoDB as suggested; MongoDB works great for this type of app due to its speed and ease of querying. SQL-like structure and consistency was not necessary for this app. 
+AI was used to speed up the development process, although it was not used for simply building the whole app; it was used to remove redundant development.
+I started with designing the database schemas; I knew I was using user-based auth from the start, so I had to account for this in the DB design.
+I then built all the CRUD routes and tested them using CURL.
+Lastly, I built the front end and made it responsive using tailwind.
+
+Deploying the project was quick and easy. I created two Docker files (for the front and back), configured CORS and nginx, and created the docker-compose file. The database was online (Atlas), so the setup for that remained the same. I launched an EC2 instance, installed Docker on it, and pulled the code from the public repository.
+Lastly, I bought a domain for the app from Cloudflare and pointed it to the EC2 Elastic IP.
+
+A major point of improvement is configuring https on the online deployment. Currently, only http is configured which is unsafe, especially when using passwords and emails. I also would have liked to spend more time personalizing the CSS to how I would like it; time did not allow for this.
 
 ## Features
 
