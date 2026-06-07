@@ -1,4 +1,4 @@
-# Task Manager (This was take home assignment for a job application; built and deployed in a few hours)
+# Task Manager (This was a take home assignment for a job application; built and deployed in a few hours)
 
 A full-stack task management app with user authentication, built with React, Node.js, Express, and MongoDB (Atlas).
 
